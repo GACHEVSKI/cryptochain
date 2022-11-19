@@ -7,13 +7,17 @@ describe('Block', () => {
     const lastHash = 'foo-lasthash';
     const hash = 'foo-hash';
     const data = ['blockchain', 'data'];
-    const block = new Block({lastHash, hash, data, timestamp});
+    const nonce = 1;
+    const difficulty = 1;
+    const block = new Block({lastHash, hash, data, timestamp, nonce, difficulty});
 
     it('has a timestamp, lastHash, hash, data properies', () => {
         expect(block.timestamp).toEqual(timestamp);
         expect(block.lastHash).toEqual(lastHash);
         expect(block.hash).toEqual(hash);
         expect(block.data).toEqual(data);
+        expect(block.nonce).toEqual(nonce);
+        expect(block.difficulty).toEqual(difficulty);
     });
 
     describe('genesis()', () => {
@@ -38,22 +42,34 @@ describe('Block', () => {
 
         it('returns a Block instance', () => {
             expect(minedBlock instanceof Block).toBeTruthy();
-        })
+        });
 
         it('sets the `lastHash` to be the `hash` of the last block', () => {
             expect(lastBlock.hash).toEqual(minedBlock.lastHash);
-        })
+        });
 
         it('sets the `data`', () => {
             expect(minedBlock.data).toBe(data);
-        })
+        });
 
         it('sets a `timestamp`', () => {
             expect(minedBlock.timestamp).not.toEqual(undefined);
-        })
+        });
 
         it('creates a SHA-256`hash` pased on proper input', () => {
-            expect(minedBlock.hash).toEqual(cryptoHash(minedBlock.timestamp, minedBlock.lastHash, minedBlock.data));
-        })
+            expect(minedBlock.hash).toEqual(
+                cryptoHash(
+                    minedBlock.timestamp,
+                    minedBlock.nonce,
+                    minedBlock.difficulty,
+                    minedBlock.lastHash,
+                    minedBlock.data
+                )
+            );
+        });
+
+        it('sets a `hash` that matches the difficulty criteria', () => {
+            expect(minedBlock.hash.substr(0, minedBlock.difficulty)).toEqual('0'.repeat(minedBlock.difficulty));
+        });
     })
 });

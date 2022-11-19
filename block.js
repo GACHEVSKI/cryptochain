@@ -6,12 +6,16 @@ class Block {
     lastHash;
     hash;
     data;
+    nonce;
+    difficulty;
 
-    constructor({timestamp, lastHash, hash, data}) {
+    constructor({timestamp, lastHash, hash, data, nonce, difficulty}) {
         this.timestamp = timestamp;
         this.lastHash = lastHash;
         this.hash = hash;
         this.data = data;
+        this.difficulty = difficulty;
+        this.nonce = nonce;
     }
 
     static genesis() {
@@ -19,15 +23,18 @@ class Block {
     }
 
     static mineBlock({ lastBlock, data}) {
-        const timestamp = Date.now();
+        let timestamp, hash;
         const lastHash = lastBlock.hash;
+        const {difficulty} = lastBlock;
+        let nonce = 0;
 
-        return new this({
-            timestamp,
-            lastHash,
-            data,
-            hash: cryptoHash(timestamp, lastBlock.hash, data)
-        });
+        do {
+            nonce++;
+            timestamp = Date.now();
+            hash = cryptoHash(timestamp, lastBlock.hash, data, nonce, difficulty)
+        } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty));
+
+        return new this({ timestamp, lastHash, data, hash, difficulty, nonce });
     };
 }
 
