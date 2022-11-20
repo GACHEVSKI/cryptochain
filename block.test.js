@@ -1,9 +1,9 @@
 const Block = require("./block");
-const {GENESIS_DATA} = require("./config");
+const {GENESIS_DATA, MINE_RATE} = require("./config");
 const cryptoHash = require("./crypto-hash");
 
 describe('Block', () => {
-    const timestamp = 'a-date';
+    const timestamp = 2000;
     const lastHash = 'foo-lasthash';
     const hash = 'foo-hash';
     const data = ['blockchain', 'data'];
@@ -56,7 +56,7 @@ describe('Block', () => {
             expect(minedBlock.timestamp).not.toEqual(undefined);
         });
 
-        it('creates a SHA-256`hash` pased on proper input', () => {
+        it('creates a SHA-256`hash` passed on proper input', () => {
             expect(minedBlock.hash).toEqual(
                 cryptoHash(
                     minedBlock.timestamp,
@@ -71,5 +71,33 @@ describe('Block', () => {
         it('sets a `hash` that matches the difficulty criteria', () => {
             expect(minedBlock.hash.substr(0, minedBlock.difficulty)).toEqual('0'.repeat(minedBlock.difficulty));
         });
-    })
+
+        describe('adjusts the difficulty', () => {
+            const possibleResults = [lastBlock.difficulty + 1, lastBlock.difficulty - 1];
+
+            expect(possibleResults.includes(minedBlock.difficulty)).toBeTruthy();
+        });
+    });
+
+    describe('adjustDifficulty', () => {
+        it('raises the difficulty for a quickly mined block', () => {
+            expect(Block.adjustDifficulty({
+                originalBlock: block,
+                timestamp: block.timestamp + MINE_RATE - 100
+            })).toEqual(block.difficulty + 1);
+        });
+
+        it('raises the difficulty for a slowly mined block', () => {
+            expect(Block.adjustDifficulty({
+                originalBlock: block,
+                timestamp: block.timestamp + MINE_RATE + 100
+            })).toEqual(block.difficulty - 1);
+        });
+
+        it('has a lower limit of 1', () => {
+            block.difficulty = -1;
+
+            expect(Block.adjustDifficulty({originalBlock: block})).toEqual(1);
+        });
+    });
 });
