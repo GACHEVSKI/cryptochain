@@ -1,4 +1,4 @@
-const PubNub = require('pubnub');
+const PubNub = require('app/pubnub');
 
 const credentials = {
     publishKey: 'pub-c-dac3e2d0-869f-495b-809d-f2370f1f6221',

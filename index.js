@@ -1,8 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-const Blockchain = require("./blockchain");
-const PubSub = require('./pubsub');
+const Blockchain = require("./blockchain/blockchain");
+const PubSub = require('./app/pubsub');
 
 const app = express();
 const blockchain = new Blockchain();
@@ -10,7 +10,6 @@ const pubSub = new PubSub({blockchain});
 
 const DEFAULT_PORT = 3000;
 const ROOT_NODE_REQUEST = `http://localhost:${DEFAULT_PORT}`;
-setTimeout(() => pubSub.broadcastChain(), 1000);
 
 app.use(bodyParser.json());
 
@@ -42,6 +41,8 @@ if (process.env.GENERATE_PEER_PORT) {
 
 const PORT = PEER_PORT || DEFAULT_PORT;
 app.listen(PORT, () => {
-   console.log(`Listening on ${PORT} port`);
-    syncChains();
+    console.log(`Listening on ${PORT} port`);
+    if (PORT !== DEFAULT_PORT) {
+        syncChains();
+    }
 });
