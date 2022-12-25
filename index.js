@@ -62,6 +62,14 @@ app.get('/api/mine-transactions', (req, res) => {
     res.redirect('/api/blocks')
 });
 
+app.get('/api/wallet-info', (req, res) => {
+    const address = wallet.publicKey;
+    res.json({
+        address,
+        balance: Wallet.calculateBalance({ chain: blockchain.chain, address })
+    });
+});
+
 const syncWithRootState = () => {
     axios.get(`${ROOT_NODE_REQUEST}/api/blocks`).then(res => {
         blockchain.replaceChain(res.data)
@@ -70,7 +78,6 @@ const syncWithRootState = () => {
     });
 
     axios.get(`${ROOT_NODE_REQUEST}/api/transaction-pool-map`).then(res => {
-        console.log('res.data', res.data);
         transactionPool.setMap(res.data)
     }, err => {
         console.error(err)
